@@ -42,7 +42,7 @@ public class Word {
 		}
 		return true;
 	}
-	
+	// returns if bar is within foo
 	public static boolean isWithin(byte[] foo, byte[] bar) {
 		for (int i = 0; i < 26; i++) {
 			if (bar[i] > foo[i])

@@ -14,7 +14,6 @@ public class BananagramsServerThread extends Thread {
     }
     
     public void run() {
-
     	
         try (
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -37,6 +36,10 @@ public class BananagramsServerThread extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public ArrayList<String> getWords() {
+    	return words;
     }
 	
 	public void removeWord(String word) {
