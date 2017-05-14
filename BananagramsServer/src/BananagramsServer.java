@@ -59,7 +59,7 @@ public class BananagramsServer {
     	currentChars = Word.difference(chars, currentChars);
     }
     
-    public void broadcast(String str) {
+    public static void broadcast(String str) {
     	
     	for(Socket clientSocket : clientSockets) {
 			try (
@@ -78,10 +78,20 @@ public class BananagramsServer {
     }
     
     public static void flip() {
-    	currentChars[(int) (letterPool.get((int)(Math.random() * letterPool.size())) - 'a')]++;
+    	char c = (char) (letterPool.remove((int)(Math.random() * letterPool.size())) - 'a');
+    	currentChars[(int) c]++;
+    	
+    	String currentCharsString = "";
+    	for (int i = 0; i < 26; i++) {
+			for (byte j = 0; j < currentChars[i]; j++) {
+				currentCharsString += (char) (i + 97) + " ";
+			}
+		}
+    	broadcast("The letter pool currently is: " + currentCharsString.trim());
     }
     
     public static boolean isWordValid(String str) {
+    	//todo: check from dictionary
     	byte[] word = Word.createCharCount(str);
     	if (Word.isWithin(currentChars, word))
     		return true;

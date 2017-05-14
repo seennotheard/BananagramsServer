@@ -7,11 +7,13 @@ public class BananagramsGameThread extends Thread {
     }
 	
 	public void run() {
-		//add broadcasts after no more letters
+		BananagramsServer.flip();
+		BananagramsServer.flip();
 		while (BananagramsServer.getLetterPool().size() != 0) {
-			BananagramsServer.flip();
 			pause(20);
+			BananagramsServer.flip();
 		}
+		BananagramsServer.broadcast("There are no more unflipped letters. The game will automatically end in 60 seconds.");
 		pause(40);
 		//end game
 	}
@@ -23,6 +25,5 @@ public class BananagramsGameThread extends Thread {
             end = new Date();
         }
     }
-	
 	
 }
