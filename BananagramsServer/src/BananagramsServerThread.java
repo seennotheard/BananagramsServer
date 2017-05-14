@@ -1,5 +1,7 @@
 import java.net.*;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.io.*;
 
 public class BananagramsServerThread extends Thread {
@@ -17,20 +19,22 @@ public class BananagramsServerThread extends Thread {
     	
         try (
             PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(
-                new InputStreamReader(
-                    socket.getInputStream()));
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         ) {
-            String inputLine, outputLine;
-            KnockKnockProtocol kkp = new KnockKnockProtocol();
-            outputLine = kkp.processInput(null);
-            out.println(outputLine);
+            String fromUser;
 
-            while ((inputLine = in.readLine()) != null) {
-                outputLine = kkp.processInput(inputLine);
-                out.println(outputLine);
-                if (outputLine.equals("Bye"))
-                    break;
+            while ((fromUser = in.readLine()) != null) {
+                broadcast(fromUser);
+                Pattern pattern = Pattern.compile("\\w+");
+                Matcher matcher = pattern.matcher(fromUser);
+                while (matcher.find()) {
+                	String word = matcher.group();
+                    if (BananagramsServer.isWordValid(word)) {
+                    	BananagramsServer.removeLetters(Word.createCharCount(word));
+                    	words.add(word);
+                    }
+                }
+                //add method for disconnect
             }
             socket.close();
         } catch (IOException e) {
@@ -45,7 +49,7 @@ public class BananagramsServerThread extends Thread {
 			try (
 					PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 				){
-					out.println(str);
+					out.println(name + ": " + str);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

@@ -63,7 +63,7 @@ public class Word {
 		}
 		return barChars;
 	}
-	
+	//subtracts foo from bar
 	public static byte[] difference(byte[] foo, byte[] bar) {
 		for (int i = 0; i < 26; i++) {
 			if (bar[i] < foo[i])

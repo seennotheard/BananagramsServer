@@ -51,15 +51,37 @@ public class BananagramsServer {
     	}
     }
     
+    public static ArrayList<Character> getLetterPool() {
+    	return letterPool;
+    }
+    
+    public static void removeLetters(byte[] chars) {
+    	currentChars = Word.difference(chars, currentChars);
+    }
+    
+    public void broadcast(String str) {
+    	
+    	for(Socket clientSocket : clientSockets) {
+			try (
+					PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+				){
+					out.println("Server: " + str);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+        }	
+    	
+    }
+    
     public static ArrayList<Socket> getClientSockets() {
     	return clientSockets;
     }
     
-    private static void flip() {
+    public static void flip() {
     	currentChars[(int) (letterPool.get((int)(Math.random() * letterPool.size())) - 'a')]++;
     }
     
-    private static boolean isWordValid(String str) {
+    public static boolean isWordValid(String str) {
     	byte[] word = Word.createCharCount(str);
     	if (Word.isWithin(currentChars, word))
     		return true;
