@@ -26,6 +26,8 @@ public class BananagramsServerThread extends Thread {
             out.println("Please enter a username.");
             while ((fromUser = in.readLine()) == null) {
         	}
+            if (fromUser.indexOf(' ') != -1)
+            	username = '"' + fromUser + '"';
             username = fromUser;
             while(true) {
             	while ((fromUser = in.readLine()) == null) {
@@ -36,9 +38,10 @@ public class BananagramsServerThread extends Thread {
                 Matcher matcher = pattern.matcher(fromUser);
                 while (matcher.find()) {
                 	String word = matcher.group();
-                    if (word != null && BananagramsServer.isWordValid(word, this)) {
+                    if (word != null && BananagramsServer.isWordValid(word)) {
                     	BananagramsServer.removeLetters(Word.createCharCount(word));
                     	BananagramsServer.broadcast("Player obtained word: " + username + ": " + word);
+                    	BananagramsServer.broadcastLetterPool();
                     	words.add(word);
                     }
                 }
@@ -70,7 +73,7 @@ public class BananagramsServerThread extends Thread {
     public ArrayList<String> getWords() {
     	return words;
     }
-	
+	//fix
 	public void removeWord(String word) {
 		for (int i = 0; i < words.size(); i++) {
 			if (words.get(i).equals(word)) {

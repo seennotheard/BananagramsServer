@@ -37,7 +37,6 @@ public class BananagramsServer {
             	clientSockets.add(serverSocket.accept());
 	            playerThreads.add(new BananagramsServerThread(clientSockets.get(i)));
 	            playerThreads.get(i).start();
-	            System.out.println("start");
 	            while(playerThreads.get(i).getUsername() == null) {
 	            	pause(.001);
 	            }
@@ -95,14 +94,7 @@ public class BananagramsServer {
     	broadcast(playerList.trim());
     }
     
-    public static ArrayList<Socket> getClientSockets() {
-    	return clientSockets;
-    }
-    
-    public static void flip() {
-    	char c = (char) (letterPool.remove((int)(Math.random() * letterPool.size())) - 'a');
-    	currentChars[(int) c]++;
-    	
+    public static void broadcastLetterPool() {
     	String currentCharsString = "";
     	for (int i = 0; i < 26; i++) {
 			for (byte j = 0; j < currentChars[i]; j++) {
@@ -112,7 +104,18 @@ public class BananagramsServer {
     	broadcast("The letter pool currently is: " + currentCharsString.trim());
     }
     
-    public static boolean isWordValid(String str, BananagramsServerThread thread) {
+    public static ArrayList<Socket> getClientSockets() {
+    	return clientSockets;
+    }
+    
+    public static void flip() {
+    	char c = (char) (letterPool.remove((int)(Math.random() * letterPool.size())) - 'a');
+    	currentChars[(int) c]++;
+    	
+    	broadcastLetterPool();
+    }
+    
+    public static boolean isWordValid(String str) {
     	//todo: check from dictionary
     	byte[] word = Word.createCharCount(str);
     	if (Word.isWithin(currentChars, word) && checkDictionary(str))
@@ -120,7 +123,8 @@ public class BananagramsServer {
     	for (BananagramsServerThread player : playerThreads) {
     		for (String w : player.getWords()) {
     			if (!str.equals(w) && Word.isWithin(Word.add(currentChars, Word.createCharCount(w)), word) && checkDictionary(str)) {
-    				thread.removeWord(str);
+    				player.removeWord(w);
+    				broadcast("Word Stolen: " + player.getUsername() + " " + w);
     				return true;
     		}
     		}
