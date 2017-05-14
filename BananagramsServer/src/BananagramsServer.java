@@ -7,6 +7,7 @@ public class BananagramsServer {
 	private static ArrayList<Character> letterPool = new ArrayList<Character>(); 
 	private static byte[] currentChars = new byte[26];
 	private static ArrayList<BananagramsServerThread> playerThreads = new ArrayList<BananagramsServerThread>();
+	private static ArrayList<Socket> clientSockets = new ArrayList<Socket>();
 	
     public static void main(String[] args) throws IOException {
 
@@ -24,10 +25,13 @@ public class BananagramsServer {
     	System.err.println("No players in the game");
     	System.exit(1);
     }
+    
+    fillLetterPool();
         
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             for (int i = 0; i < numberOfPlayers; i++) {
-	            playerThreads.add(new BananagramsServerThread(serverSocket.accept()));
+            	clientSockets.add(serverSocket.accept());
+	            playerThreads.add(new BananagramsServerThread(clientSockets.get(i)));
 	            playerThreads.get(i).start();
 	        }
 	    } catch (IOException e) {
@@ -38,7 +42,7 @@ public class BananagramsServer {
         
     }
     
-    private void fillLetterPool() {
+    private static void fillLetterPool() {
     	byte[] charCount = {13, 3, 3, 6, 18, 3, 4, 3, 12, 2, 2, 5, 3, 8, 11, 3, 2, 9, 6, 9, 6, 3, 3, 2, 3, 2};
     	for (int i = 0; i < charCount.length; i++) {
     		for (int j = 0; j < charCount[i]; i++) {
@@ -47,11 +51,15 @@ public class BananagramsServer {
     	}
     }
     
-    private void flip() {
+    public static ArrayList<Socket> getClientSockets() {
+    	return clientSockets;
+    }
+    
+    private static void flip() {
     	currentChars[(int) (letterPool.get((int)(Math.random() * letterPool.size())) - 'a')]++;
     }
     
-    private boolean isWordValid(String str) {
+    private static boolean isWordValid(String str) {
     	byte[] word = Word.createCharCount(str);
     	if (Word.isWithin(currentChars, word))
     		return true;

@@ -38,6 +38,21 @@ public class BananagramsServerThread extends Thread {
         }
     }
     
+    private void broadcast(String str) {
+    	ArrayList<Socket> clientSockets = BananagramsServer.getClientSockets();
+    	
+    	for(Socket clientSocket : clientSockets) {
+			try (
+					PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+				){
+					out.println(str);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+        }	
+    	
+    }
+    
     public ArrayList<String> getWords() {
     	return words;
     }
