@@ -6,7 +6,7 @@ import java.io.*;
 
 public class BananagramsServerThread extends Thread {
     private Socket socket = null;
-    private String name;
+    private String name = null;
 	private ArrayList<String> words;
     
 
@@ -22,7 +22,8 @@ public class BananagramsServerThread extends Thread {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         ) {
             String fromUser;
-
+            out.println("Please enter a username.");
+            name = in.readLine();
             while ((fromUser = in.readLine()) != null) {
                 broadcast(fromUser);
                 Pattern pattern = Pattern.compile("\\w+");
@@ -71,5 +72,9 @@ public class BananagramsServerThread extends Thread {
 	
 	public void addWord(String word) {
 			words.add(word);
+	}
+	
+	public String getUsername() {
+		return name;
 	}
 }

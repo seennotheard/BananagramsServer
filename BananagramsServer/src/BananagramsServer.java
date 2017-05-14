@@ -33,19 +33,25 @@ public class BananagramsServer {
             	clientSockets.add(serverSocket.accept());
 	            playerThreads.add(new BananagramsServerThread(clientSockets.get(i)));
 	            playerThreads.get(i).start();
+	            while(true) {
+	            	if (playerThreads.get(i).getName() != null) {
+	            		broadcast("Player " + playerThreads.get(i).getName() + " has connected.\n" + (i + 1) + "/" + numberOfPlayers);
+	            	}
+	            }
 	        }
 	    } catch (IOException e) {
             System.err.println("Could not listen on port " + portNumber);
             System.exit(-1);
         }
         
-        
+        broadcast("The game is starting. In 20 seconds, a third letter will be flipped.");
+        new BananagramsGameThread().run();
     }
     
     private static void fillLetterPool() {
     	byte[] charCount = {13, 3, 3, 6, 18, 3, 4, 3, 12, 2, 2, 5, 3, 8, 11, 3, 2, 9, 6, 9, 6, 3, 3, 2, 3, 2};
     	for (int i = 0; i < charCount.length; i++) {
-    		for (int j = 0; j < charCount[i]; i++) {
+    		for (int j = 0; j < charCount[i]; j++) {
     			letterPool.add((char) ('a' + i));
     		}
     	}
@@ -103,6 +109,8 @@ public class BananagramsServer {
     	}
 		return false;
     }
+    
+    
     
     
 }
