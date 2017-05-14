@@ -168,8 +168,11 @@ public class BananagramsServer {
     		}
     		if (score > highscore) {
     			winner = player.getUsername();
+    			highscore = score;
     		}
     	}
-    	broadcast("Player " + winner + " has won, with " + highscore + " letters. The game is now over.");
+    	if (highscore == -1)
+    		broadcast("Error calculating winner.");
+    	else broadcast("Player " + winner + " has won, with " + highscore + " letters. The game is now over.");
     }
 }
