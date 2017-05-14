@@ -21,13 +21,15 @@ public class BananagramsClientThread extends Thread {
 	            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	        ) {
 				Scanner scanner = new Scanner(System.in);
-				String str = scanner.next();
-	            while ((str = in.readLine()) != null) {
-	                out.println(str);
+				String str;
+				while (true) {
+					str = scanner.next();
+					out.println(str);
+	                System.out.println(str);
 	                //add method for disconnect
-	            }
-	            scanner.close();
-	            socket.close();
+				}
+	            //scanner.close();
+	            //socket.close();
 	        } catch (IOException e) {
 	            e.printStackTrace();
 	        }

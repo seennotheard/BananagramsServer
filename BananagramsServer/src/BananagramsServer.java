@@ -1,5 +1,6 @@
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.io.*;
 
 public class BananagramsServer {
@@ -28,16 +29,17 @@ public class BananagramsServer {
     
     fillLetterPool();
         
-        try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
+        try {
+        	ServerSocket serverSocket = new ServerSocket(portNumber);
             for (int i = 0; i < numberOfPlayers; i++) {
             	clientSockets.add(serverSocket.accept());
 	            playerThreads.add(new BananagramsServerThread(clientSockets.get(i)));
 	            playerThreads.get(i).start();
-	            while(true) {
-	            	if (playerThreads.get(i).getName() != null) {
-	            		broadcast("Player " + playerThreads.get(i).getName() + " has connected.\n" + (i + 1) + "/" + numberOfPlayers);
-	            	}
+	            System.out.println("start");
+	            while(playerThreads.get(i).getUsername() == null) {
+	            	pause(.001);
 	            }
+	            broadcast("Player " + playerThreads.get(i).getUsername() + " has connected.\n" + (i + 1) + "/" + numberOfPlayers + " players connected.");
 	        }
 	    } catch (IOException e) {
             System.err.println("Could not listen on port " + portNumber);
@@ -45,7 +47,7 @@ public class BananagramsServer {
         }
         
         broadcast("The game is starting. In 20 seconds, a third letter will be flipped.");
-        new BananagramsGameThread().run();
+        new BananagramsGameThread().start();
     }
     
     private static void fillLetterPool() {
@@ -72,6 +74,7 @@ public class BananagramsServer {
 					PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 				){
 					out.println("Server: " + str);
+					
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -108,6 +111,14 @@ public class BananagramsServer {
     		}
     	}
 		return false;
+    }
+    
+    private static void pause (double seconds) {
+        Date start = new Date();
+        Date end = new Date();
+        while (end.getTime() - start.getTime() < seconds * 1000) {
+            end = new Date();
+        }
     }
     
     

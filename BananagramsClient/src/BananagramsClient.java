@@ -19,12 +19,12 @@ public class BananagramsClient {
             BufferedReader in = new BufferedReader(
                 new InputStreamReader(socket.getInputStream()));
         ) {
+        	new BananagramsClientThread(socket).start();
             String fromServer;
-            String fromUser;
-
-            while ((fromServer = in.readLine()) != null) {
+            while (true) {
+            	while ((fromServer = in.readLine()) == null) {
+            	}
                 System.out.println(fromServer);
-                
             }
         } catch (UnknownHostException e) {
             System.err.println("Don't know about host " + hostName);

@@ -1,16 +1,18 @@
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.io.*;
 
 public class BananagramsServerThread extends Thread {
     private Socket socket = null;
-    private String name = null;
+    private String username = null;
 	private ArrayList<String> words;
     
 
     public BananagramsServerThread(Socket socket) {
+    	
         super("BananagramsServerThread");
         this.socket = socket;
     }
@@ -23,9 +25,15 @@ public class BananagramsServerThread extends Thread {
         ) {
             String fromUser;
             out.println("Please enter a username.");
-            name = in.readLine();
-            while ((fromUser = in.readLine()) != null) {
-                broadcast(fromUser);
+            while ((fromUser = in.readLine()) == null) {
+        	}
+            username = fromUser;
+            System.out.println(this.getUsername());
+            while(true) {
+            	while ((fromUser = in.readLine()) == null) {
+            		pause(0.01);
+                }
+            	broadcast(fromUser);
                 Pattern pattern = Pattern.compile("\\w+");
                 Matcher matcher = pattern.matcher(fromUser);
                 while (matcher.find()) {
@@ -37,7 +45,7 @@ public class BananagramsServerThread extends Thread {
                 }
                 //add method for disconnect
             }
-            socket.close();
+            //socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -50,7 +58,7 @@ public class BananagramsServerThread extends Thread {
 			try (
 					PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
 				){
-					out.println(name + ": " + str);
+					out.println(username + ": " + str);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -75,6 +83,14 @@ public class BananagramsServerThread extends Thread {
 	}
 	
 	public String getUsername() {
-		return name;
+		return username;
 	}
+	
+	private static void pause (double seconds) {
+        Date start = new Date();
+        Date end = new Date();
+        while (end.getTime() - start.getTime() < seconds * 1000) {
+            end = new Date();
+        }
+    }
 }
