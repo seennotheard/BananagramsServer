@@ -23,9 +23,8 @@ public class BananagramsClientThread extends Thread {
 				Scanner scanner = new Scanner(System.in);
 				String str;
 				while (true) {
-					str = scanner.next();
+					str = scanner.nextLine();
 					out.println(str);
-	                System.out.println(str);
 	                //add method for disconnect
 				}
 	            //scanner.close();

@@ -8,7 +8,7 @@ import java.io.*;
 public class BananagramsServerThread extends Thread {
     private Socket socket = null;
     private String username = null;
-	private ArrayList<String> words;
+	private ArrayList<String> words = new ArrayList<String>();
     
 
     public BananagramsServerThread(Socket socket) {
@@ -19,16 +19,14 @@ public class BananagramsServerThread extends Thread {
     
     public void run() {
     	
-        try (
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+        try {
+        	PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        ) {
             String fromUser;
             out.println("Please enter a username.");
             while ((fromUser = in.readLine()) == null) {
         	}
             username = fromUser;
-            System.out.println(this.getUsername());
             while(true) {
             	while ((fromUser = in.readLine()) == null) {
             		pause(0.01);
@@ -38,13 +36,16 @@ public class BananagramsServerThread extends Thread {
                 Matcher matcher = pattern.matcher(fromUser);
                 while (matcher.find()) {
                 	String word = matcher.group();
-                    if (BananagramsServer.isWordValid(word)) {
+                    if (word != null && BananagramsServer.isWordValid(word, this)) {
                     	BananagramsServer.removeLetters(Word.createCharCount(word));
+                    	BananagramsServer.broadcast("Player obtained word: " + username + ": " + word);
                     	words.add(word);
                     }
                 }
                 //add method for disconnect
             }
+            //out.flush();
+            //in.flush();
             //socket.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -55,10 +56,10 @@ public class BananagramsServerThread extends Thread {
     	ArrayList<Socket> clientSockets = BananagramsServer.getClientSockets();
     	
     	for(Socket clientSocket : clientSockets) {
-			try (
-					PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-				){
-					out.println(username + ": " + str);
+			try {
+				PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+				out.println(username + ": " + str);
+				out.flush();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

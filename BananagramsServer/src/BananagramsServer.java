@@ -1,10 +1,12 @@
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Scanner;
 import java.io.*;
 
 public class BananagramsServer {
 	
+	private static File file = new File("dictionary.txt");
 	private static ArrayList<Character> letterPool = new ArrayList<Character>(); 
 	private static byte[] currentChars = new byte[26];
 	private static ArrayList<BananagramsServerThread> playerThreads = new ArrayList<BananagramsServerThread>();
@@ -47,6 +49,7 @@ public class BananagramsServer {
         }
         
         broadcast("The game is starting. In 20 seconds, a third letter will be flipped.");
+        broadcastPlayerList();
         new BananagramsGameThread().start();
     }
     
@@ -70,16 +73,26 @@ public class BananagramsServer {
     public static void broadcast(String str) {
     	
     	for(Socket clientSocket : clientSockets) {
-			try (
-					PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-				){
-					out.println("Server: " + str);
+
+			try {
+				PrintWriter out = new PrintWriter(clientSocket.getOutputStream());
+				out.println("Server: " + str);
+				out.flush();
 					
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			
         }	
     	
+    }
+    
+    private static void broadcastPlayerList() {
+    	String playerList = "Player List: ";
+    	for(BananagramsServerThread player : playerThreads) {
+    		playerList += player.getUsername() + " ";
+        }
+    	broadcast(playerList.trim());
     }
     
     public static ArrayList<Socket> getClientSockets() {
@@ -99,18 +112,38 @@ public class BananagramsServer {
     	broadcast("The letter pool currently is: " + currentCharsString.trim());
     }
     
-    public static boolean isWordValid(String str) {
+    public static boolean isWordValid(String str, BananagramsServerThread thread) {
     	//todo: check from dictionary
     	byte[] word = Word.createCharCount(str);
-    	if (Word.isWithin(currentChars, word))
+    	if (Word.isWithin(currentChars, word) && checkDictionary(str))
     		return true;
     	for (BananagramsServerThread player : playerThreads) {
-    		for(String w : player.getWords()) {
-    			if (Word.isWithin(Word.add(currentChars, Word.createCharCount(w)), word))
+    		for (String w : player.getWords()) {
+    			if (!str.equals(w) && Word.isWithin(Word.add(currentChars, Word.createCharCount(w)), word) && checkDictionary(str)) {
+    				thread.removeWord(str);
     				return true;
+    		}
     		}
     	}
 		return false;
+    }
+    
+    private static boolean checkDictionary(String str) {
+    	try {
+			Scanner scanner = new Scanner(file);
+			int strLen = str.length();
+			while (scanner.hasNextLine()) {
+	        	String word = scanner.nextLine().toLowerCase();
+	        	if (word.length() > strLen)
+	        		return false;
+	        	if (word.equals(str.toLowerCase()))
+	        		return true;
+	        }
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return false;
     }
     
     private static void pause (double seconds) {
@@ -121,7 +154,18 @@ public class BananagramsServer {
         }
     }
     
-    
-    
-    
+    public static void endGame() {
+    	String winner = null;
+    	int highscore = -1;
+    	for (BananagramsServerThread player : playerThreads) {
+    		int score = 0;
+    		for(String word : player.getWords()) {
+    			score += word.length();
+    		}
+    		if (score > highscore) {
+    			winner = player.getUsername();
+    		}
+    	}
+    	broadcast("Player " + winner + " has won, with " + highscore + " letters. The game is now over.");
+    }
 }

@@ -15,7 +15,7 @@ public class BananagramsGameThread extends Thread {
 		}
 		BananagramsServer.broadcast("There are no more unflipped letters. The game will automatically end in 60 seconds.");
 		pause(40);
-		//end game
+		BananagramsServer.endGame();
 	}
 	
 	private static void pause (double seconds) {
