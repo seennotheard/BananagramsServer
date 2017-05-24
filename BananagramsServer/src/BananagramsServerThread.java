@@ -40,7 +40,7 @@ public class BananagramsServerThread extends Thread {
                 	String word = matcher.group();
                     if (word != null && BananagramsServer.isWordValid(word)) {
                     	BananagramsServer.removeLetters(Word.createCharCount(word));
-                    	BananagramsServer.broadcast("Player obtained word: " + username + ": " + word);
+                    	BananagramsServer.broadcast(username + " got \"" + word + "\".");
                     	BananagramsServer.broadcastLetterPool();
                     	words.add(word);
                     }
