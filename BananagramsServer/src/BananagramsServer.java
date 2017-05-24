@@ -104,6 +104,18 @@ public class BananagramsServer {
     	broadcast("The letter pool currently is: " + currentCharsString.trim());
     }
     
+    public static void broadcastWords() {
+    	String currentCharsString = "";
+    	for (BananagramsServerThread player : playerThreads) {
+    		currentCharsString = currentCharsString + player.getUsername() + "has";
+    		for (String word : player.getWords()) {
+    			currentCharsString = currentCharsString + " " + word;
+    		}
+    		currentCharsString = currentCharsString + '.';
+    	}
+    	broadcast(currentCharsString);
+    }
+    
     public static ArrayList<Socket> getClientSockets() {
     	return clientSockets;
     }
