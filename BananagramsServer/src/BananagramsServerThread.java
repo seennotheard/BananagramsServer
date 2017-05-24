@@ -42,6 +42,7 @@ public class BananagramsServerThread extends Thread {
                     	BananagramsServer.removeLetters(Word.createCharCount(word));
                     	BananagramsServer.broadcast(username + " got \"" + word + "\".");
                     	BananagramsServer.broadcastLetterPool();
+                    	BananagramsServer.broadcastWords();
                     	words.add(word);
                     }
                 }
