@@ -116,7 +116,6 @@ public class BananagramsServer {
     }
     
     public static boolean isWordValid(String str) {
-    	//todo: check from dictionary
     	byte[] word = Word.createCharCount(str);
     	if (Word.isWithin(currentChars, word) && checkDictionary(str))
     		return true;

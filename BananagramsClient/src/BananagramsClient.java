@@ -55,7 +55,7 @@ public class BananagramsClient {
                 }
                 else if (fromServer.length() >= 21 && fromServer.substring(0, 21).equals("Server: Word Stolen: ")) {
                 	Pattern pattern = Pattern.compile("\\w+");
-                    Matcher matcher = pattern.matcher(fromServer.substring(30));
+                    Matcher matcher = pattern.matcher(fromServer.substring(21));
                     matcher.find();
                     String player = matcher.group();
                     matcher.find();
