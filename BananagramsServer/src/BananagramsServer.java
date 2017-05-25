@@ -13,39 +13,21 @@ public class BananagramsServer {
 	private static ArrayList<Socket> clientSockets = new ArrayList<Socket>();
 	
     public static void main(String[] args) throws IOException {
-
-    if (args.length != 2) {
-        System.err.println("Usage: java BananagramsServer <port number> <number of players>");
-        System.exit(1);
-    }
-
-    
-        int portNumber = Integer.parseInt(args[0]);
-        
-        int numberOfPlayers = Integer.parseInt(args[1]);
-    
-    if (numberOfPlayers <= 0) {
-    	System.err.println("No players in the game");
-    	System.exit(1);
-    }
-    
-    fillLetterPool();
-        
-        try {
-        	ServerSocket serverSocket = new ServerSocket(portNumber);
-            for (int i = 0; i < numberOfPlayers; i++) {
-            	clientSockets.add(serverSocket.accept());
-	            playerThreads.add(new BananagramsServerThread(clientSockets.get(i)));
-	            playerThreads.get(i).start();
-	            while(playerThreads.get(i).getUsername() == null) {
-	            	pause(.001);
-	            }
-	            broadcast("Player " + playerThreads.get(i).getUsername() + " has connected.\n" + (i + 1) + "/" + numberOfPlayers + " players connected.");
-	        }
-	    } catch (IOException e) {
-            System.err.println("Could not listen on port " + portNumber);
-            System.exit(-1);
-        }
+    	if (args.length != 1) {
+    		System.err.println("Usage: java BananagramsServer <port number>");
+    	    System.exit(1);
+    	} 
+    	int portNumber = Integer.parseInt(args[0]);  
+    	fillLetterPool();
+    	new BananagramsServerConnectionThread(portNumber).start();
+    	
+    	while(playerThreads.size() == 0) {
+    		pause(.001);
+    	}
+    	broadcast("Waiting on one more player to join.");
+    	while(playerThreads.size() <= 1) {
+    		pause(.001);
+    	}
         
         broadcast("The game is starting. In 20 seconds, a third letter will be flipped.");
         broadcastPlayerList();
@@ -108,16 +90,34 @@ public class BananagramsServer {
     	String currentCharsString = "";
     	for (BananagramsServerThread player : playerThreads) {
     		currentCharsString = currentCharsString + player.getUsername() + "has";
-    		for (String word : player.getWords()) {
-    			currentCharsString = currentCharsString + " " + word;
+    		if (player.getWords().size() == 0)
+    			currentCharsString += " no words";
+    		else {
+    			for (String word : player.getWords()) {
+    				currentCharsString = currentCharsString + " " + word;
+    			}
     		}
     		currentCharsString = currentCharsString + '.';
+    		currentCharsString = currentCharsString + '\n';
     	}
     	broadcast(currentCharsString);
     }
     
     public static ArrayList<Socket> getClientSockets() {
     	return clientSockets;
+    }
+    
+    public static void addPlayer(BananagramsServerThread player, Socket socket) {
+    	playerThreads.add(player);
+    	clientSockets.add(socket);
+    }
+    
+    public static void removePlayer(BananagramsServerThread player) {
+    	for (int i = 0; i < playerThreads.size(); i++) {
+			if (playerThreads.get(i).equals(player)) {
+				playerThreads.remove(i);
+			}
+		}
     }
     
     public static void flip() {
@@ -144,8 +144,10 @@ public class BananagramsServer {
     }
     
     private static boolean checkDictionary(String str) {
-    	try {
-			Scanner scanner = new Scanner(file);
+    	try (
+    		Scanner scanner = new Scanner(file);
+    	)
+    	{
 			int strLen = str.length();
 			while (scanner.hasNextLine()) {
 	        	String word = scanner.nextLine().toLowerCase();

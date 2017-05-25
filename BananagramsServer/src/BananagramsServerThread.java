@@ -29,6 +29,10 @@ public class BananagramsServerThread extends Thread {
             if (fromUser.indexOf(' ') != -1)
             	username = '"' + fromUser + '"';
             username = fromUser;
+            BananagramsServer.addPlayer(this, socket);
+            BananagramsServer.broadcast("Player " + username + " has connected.");
+            BananagramsServer.broadcastLetterPool();
+            BananagramsServer.broadcastWords();
             while(true) {
             	while ((fromUser = in.readLine()) == null) {
             		pause(0.01);
@@ -41,9 +45,9 @@ public class BananagramsServerThread extends Thread {
                     if (word != null && BananagramsServer.isWordValid(word)) {
                     	BananagramsServer.removeLetters(Word.createCharCount(word));
                     	BananagramsServer.broadcast(username + " got \"" + word + "\".");
+                    	words.add(word);
                     	BananagramsServer.broadcastLetterPool();
                     	BananagramsServer.broadcastWords();
-                    	words.add(word);
                     }
                 }
                 //add method for disconnect
