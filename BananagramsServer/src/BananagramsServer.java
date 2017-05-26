@@ -11,6 +11,7 @@ public class BananagramsServer {
 	private static byte[] currentChars = new byte[26];
 	private static ArrayList<BananagramsServerThread> playerThreads = new ArrayList<BananagramsServerThread>();
 	private static ArrayList<Socket> clientSockets = new ArrayList<Socket>();
+	private static ArrayList<String> serverWords = new ArrayList<String>();
 	
     public static void main(String[] args) throws IOException {
     	if (args.length != 1) {
@@ -88,19 +89,26 @@ public class BananagramsServer {
     
     public static void broadcastWords() {
     	String currentCharsString = "";
-    	for (BananagramsServerThread player : playerThreads) {
-    		currentCharsString = currentCharsString + player.getUsername() + "has";
-    		if (player.getWords().size() == 0)
-    			currentCharsString += " no words";
-    		else {
-    			for (String word : player.getWords()) {
-    				currentCharsString = currentCharsString + " " + word;
-    			}
+    	if (serverWords.size() != 0) {
+    		currentCharsString = currentCharsString + "The server has";
+    		for (String word : serverWords) {
+    			currentCharsString = currentCharsString + " " + word;
     		}
     		currentCharsString = currentCharsString + '.';
     		currentCharsString = currentCharsString + '\n';
     	}
-    	broadcast(currentCharsString);
+    	for (BananagramsServerThread player : playerThreads) {
+    		if (player.getWords().size() != 0) {
+    			currentCharsString = currentCharsString + player.getUsername() + " has";
+    			for (String word : player.getWords()) {
+    				currentCharsString = currentCharsString + " " + word;
+    			}
+        		currentCharsString = currentCharsString + '.';
+        		currentCharsString = currentCharsString + '\n';
+    		}
+    	}
+    	if (!currentCharsString.equals(""))
+    		broadcast(currentCharsString);
     }
     
     public static ArrayList<Socket> getClientSockets() {
@@ -115,6 +123,9 @@ public class BananagramsServer {
     public static void removePlayer(BananagramsServerThread player) {
     	for (int i = 0; i < playerThreads.size(); i++) {
 			if (playerThreads.get(i).equals(player)) {
+				for (String word : player.getWords()) {
+					serverWords.add(word);
+				}
 				playerThreads.remove(i);
 			}
 		}
@@ -131,13 +142,25 @@ public class BananagramsServer {
     	byte[] word = Word.createCharCount(str);
     	if (Word.isWithin(currentChars, word) && checkDictionary(str))
     		return true;
+    	
+    	for (String w : serverWords) {
+			if (!str.equals(w) && Word.isWithin(Word.add(currentChars, Word.createCharCount(w)), word) && checkDictionary(str)) {
+				for (int i = 0; i < serverWords.size(); i++) {
+					if (w.equals(serverWords.get(i)));
+						serverWords.remove(i);
+				}
+				broadcast("Word Stolen: " + "server " + w);
+				return true;
+			}
+		}
+    	
     	for (BananagramsServerThread player : playerThreads) {
     		for (String w : player.getWords()) {
     			if (!str.equals(w) && Word.isWithin(Word.add(currentChars, Word.createCharCount(w)), word) && checkDictionary(str)) {
     				player.removeWord(w);
     				broadcast("Word Stolen: " + player.getUsername() + " " + w);
     				return true;
-    		}
+    			}
     		}
     	}
 		return false;

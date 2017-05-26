@@ -50,11 +50,14 @@ public class BananagramsServerThread extends Thread {
                     	BananagramsServer.broadcastWords();
                     }
                 }
-                //add method for disconnect
             }
             //out.flush();
             //in.flush();
             //socket.close();
+        } catch (SocketException e) {
+        	BananagramsServer.removePlayer(this);
+        	BananagramsServer.broadcast("Player " + username + " has disconnected. Giving " + username + "'s words to the server.");
+        	BananagramsServer.broadcastWords();
         } catch (IOException e) {
             e.printStackTrace();
         }
