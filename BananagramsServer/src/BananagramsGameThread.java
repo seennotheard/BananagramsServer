@@ -17,7 +17,6 @@ public class BananagramsGameThread extends Thread {
 		pause(40);
 		BananagramsServer.endGame();
 	}
-	
 	private static void pause (double seconds) {
         Date start = new Date();
         Date end = new Date();
@@ -25,5 +24,4 @@ public class BananagramsGameThread extends Thread {
             end = new Date();
         }
     }
-	
 }
